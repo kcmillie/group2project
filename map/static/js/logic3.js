@@ -1,10 +1,3 @@
-// from data.js
-// var tableData = DATA; //individualized data per beer with brewery info
-
-// var year = year;//has lat and long info; everything else is average data
-
-// console.log(year)
-
 function buildMap(){
   d3.json('/breweries').then((year) => {
     // Create the tile layer that will be the background of our map
@@ -17,9 +10,9 @@ function buildMap(){
 
     // Initialize all of the LayerGroups we'll be using
     var layers = {
-      Founded_2016_now: new L.LayerGroup(),
-      Founded_2010_to_2015: new L.LayerGroup(),
-      Before_2010: new L.LayerGroup()
+      Founded_2016_now: new L.featureGroup(),
+      Founded_2010_to_2015: new L.featureGroup(),
+      Before_2010: new L.featureGroup()
     };
 
     // Create the map object with options
@@ -36,9 +29,9 @@ function buildMap(){
     lightmap.addTo(map);
 
     var overlays = {
-      "Opened in 2016 to now": layers.Founded_2016_now,
-      "Opened between 2010 to 2015": layers.Founded_2010_to_2015,
-      "Opened before 2010": layers.Before_2010
+      "Founded_2016_now": layers.Founded_2016_now,
+      "Founded_2010_to_2015": layers.Founded_2010_to_2015,
+      "Before_2010": layers.Before_2010
     }
 
     L.control.layers(null, overlays).addTo(map);
@@ -80,18 +73,39 @@ function buildMap(){
 
       newMarker.bindPopup(year[i].name + "<br> Year Opened: " + year[i].year);
     }
-    console.log(brewCount)
+
+    var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
+
+    map.on("overlayadd", (e) => {
+      keys.push(e["name"]);
+      console.log(keys);
+    });
+
+    map.on("overlayremove", (e) => {
+      var index = keys.indexOf(e["name"]);
+      keys.splice(index, 1);
+      console.log(keys);
+    });
+
+    console.log(brewCount);
+
   });
 }
 
-function boozybeerPlot(){
+// function miniboozyplot(year, type){
+//   d3.json('/beers').then((beer) => {
+
+//   })
+// }
+
+function boozybeerPlot(keys){
   d3.json('/beers').then((beer) => {
     var BeerCount= [
-      {'abv': 'no info', '2016tonow': 0, '2010to2015': 0, 'Before2010':0},
-      {'abv': 'Water Beer', '2016tonow': 0, '2010to2015': 0, 'Before2010':0},
-      {'abv': 'Regular', '2016tonow': 0, '2010to2015': 0, 'Before2010':0},
-      {'abv': 'Boozy', '2016tonow': 0, '2010to2015': 0, 'Before2010':0},
-      {'abv': 'Very Boozy', '2016tonow': 0, '2010to2015': 0, 'Before2010':0}
+      {'abv': 'no info', 'Founded_2016_now': 0, 'Founded_2010_to_2015': 0, 'Before_2010':0},
+      {'abv': 'Water Beer', 'Founded_2016_now': 0, 'Founded_2010_to_2015': 0, 'Before_2010':0},
+      {'abv': 'Regular', 'Founded_2016_now': 0, 'Founded_2010_to_2015': 0, 'Before_2010':0},
+      {'abv': 'Boozy', 'Founded_2016_now': 0, 'Founded_2010_to_2015': 0, 'Before_2010':0},
+      {'abv': 'Very Boozy', 'Founded_2016_now': 0, 'Founded_2010_to_2015': 0, 'Before_2010':0}
     ];
 
     function p2f(x){
@@ -104,53 +118,53 @@ function boozybeerPlot(){
 
     for (var i = 0; i < beer.length; i++) {
       if(beer[i]['abv'] == '-'){
-        // BeerCount[0]['total']++;
         if(beer[i]['yearfounded'] > 2015){
-          BeerCount[0]['2016tonow']++;
+          BeerCount[0]['Founded_2016_now']++;
         } else if(beer[i]['yearfounded'] > 2009) {
-          BeerCount[0]['2010to2015']++;
+          BeerCount[0]['Founded_2010_to_2015']++;
         } else {
-          BeerCount[0][['breakdown']['Before2010']]++;
+          BeerCount[0]['Before_2010']++;
         };
       } else if (p2f(beer[i]['abv']) < 5.0){
-        // BeerCount[1]['total']++;
         if(beer[i]['yearfounded'] > 2015){
-          BeerCount[1]['2016tonow']++;
+          BeerCount[1]['Founded_2016_now']++;
         } else if(beer[i]['yearfounded'] > 2009) {
-          BeerCount[1]['2010to2015']++;
+          BeerCount[1]['Founded_2010_to_2015']++;
         } else {
-          BeerCount[1]['Before2010']++;
+          BeerCount[1]['Before_2010']++;
         };
       } else if (p2f(beer[i]['abv']) < 7.0) {
         // BeerCount[2]['total']++;
         if(beer[i]['yearfounded'] > 2015){
-          BeerCount[2]['2016tonow']++;
+          BeerCount[2]['Founded_2016_now']++;
         } else if(beer[i]['yearfounded'] > 2009) {
-          BeerCount[2]['2010to2015']++;
+          BeerCount[2]['Founded_2010_to_2015']++;
         } else {
-          BeerCount[2]['Before2010']++;
+          BeerCount[2]['Before_2010']++;
         };
       } else if (p2f(beer[i]['abv']) < 9.0) {
         // BeerCount[3]['total']++;
         if(beer[i]['yearfounded'] > 2015){
-          BeerCount[3]['2016tonow']++;
+          BeerCount[3]['Founded_2016_now']++;
         } else if(beer[i]['yearfounded'] > 2009) {
-          BeerCount[3]['2010to2015']++;
+          BeerCount[3]['Founded_2010_to_2015']++;
         } else {
-          BeerCount[3]['Before2010']++;
+          BeerCount[3]['Before_2010']++;
         };
       } else {
         // BeerCount[4]['total']++;
         if(beer[i]['yearfounded'] > 2015){
-          BeerCount[4]['2016tonow']++;
+          BeerCount[4]['Founded_2016_now']++;
         } else if(beer[i]['yearfounded'] > 2009) {
-          BeerCount[4]['2010to2015']++;
+          BeerCount[4]['Founded_2010_to_2015']++;
         } else {
-          BeerCount[4]['Before2010']++;
+          BeerCount[4]['Before_2010']++;
         };
       }
     }
     console.log(BeerCount);
+
+function BoozyStackedPlot(beerdata, keys){
     var svgWidth = 600,
         svgHeight = 500;
 
@@ -175,15 +189,15 @@ function boozybeerPlot(){
         .rangeRound([height, 0]);
 
     // load the csv and create the chart
-    x.domain(BeerCount.map(function(d) { return d.abv; }));
+    x.domain(beerdata.map(function(d) { return d.abv; }));
     y.domain([0, 200]).nice();
     var z = d3.scaleOrdinal().range(["#98abc5", "#8a89a6", "#7b6888"]);
 
-    var keys = ['2016tonow', '2010to2015','Before2010'];
+    var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
 
     var rectangles = g.append("g")
       .selectAll("g")
-      .data(d3.stack().keys(keys)(BeerCount))
+      .data(d3.stack().keys(keys)(beerdata))
       .enter().append("g")
         .attr("fill", function(d) { return z(d.key); })
       .selectAll("rect")
@@ -210,9 +224,22 @@ function boozybeerPlot(){
         .attr("font-weight", "bold")
         .attr("text-anchor", "start");
 
+    function keyTest(obj, value){
+        var key = null;
+        for (var prop in obj){
+          if (obj.hasOwnProperty(prop)){
+            if (obj[prop] === value){
+              key = prop;
+            }
+          }
+        }
+        return key;
+      };
+
     var toolTip = d3.tip()
       .attr("class", "tooltip")
       .html(function(d) {
+        console.log(keyTest(d.data, d[1]-d[0]))
         return (`Quantity: ${d[1]-d[0]}`);
       });
 
@@ -245,8 +272,8 @@ function boozybeerPlot(){
         .attr("y", 9.5)
         .attr("dy", "0.32em")
         .text(function(d) { return d; });
-  });
 };
+
 
 buildMap();
 boozybeerPlot();
