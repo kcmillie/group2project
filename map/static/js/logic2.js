@@ -5,119 +5,62 @@ var averageScore = averageScore;
 // console.log(tableData)
 
 // ***** PLOT SECTION **//
+function buildbigChart(){
+  // set the dimensions and margins of the graph
+  var margin = {top: 20, right: 20, bottom: 30, left: 40},
+      width = 960 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
 
-function buildChart(data5) {
-  var svgWidth = 900;
-  var svgHeight = 500;
+  // set the ranges
+  var x = d3.scaleBand()
+            .range([0, width])
+            .padding(0.1);
+  var y = d3.scaleLinear()
+            .range([height, 0]);
 
-  var margin = {
-    top: 20,
-    right: 40,
-    bottom: 60,
-    left: 50
-  };
+  // append the svg object to the body of the page
+  // append a 'group' element to 'svg'
+  // moves the 'group' element to the top left margin
+  var svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
 
-  var width = svgWidth - margin.left - margin.right;
-  var height = svgHeight - margin.top - margin.bottom;
+  // get the data
+  // format the data
+  var chartData = tableData.forEach(function(d) {
+    d.abv = +d.abv;
+  });
 
-  var svg = d3.select("#bigbeerbarplot")
+  // Scale the range of the data in the domains
+  x.domain(tableData.map(function(d) { return d['RateBeer ID']; }));
+  y.domain([0, d3.max(tableData, function(d) { return d.abv; })]);
 
-  svg.html("");
+  // append the rectangles for the bar chart
+  svg.selectAll(".bar")
+      .data(chartData)
+      .enter()
+      .append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d['RateBeer ID']); })
+      .attr("width", x.bandwidth())
+      .attr("y", function(d) { return y(d.abv); })
+      .attr("height", function(d) { return height - y(d.abv); });
 
-  // var chart = svg.append("svg")
-  //       .attr("width", width + margin.left + margin.right)
-  //       .attr("height", height + margin.top + margin.bottom)
-  //       .append("g")
-  //       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  // add the x Axis
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
 
-  // // parse data as numbers
-  // tableData.forEach(function(data){
-  //   data.abv = parseFloat(data.abv);
-  //   data.calories = parseFloat(data.calories);
-  //   data.ibu = parseFloat(data.ibu);
-  // });
-
-  // console.log(tableData)
-
-  // var x = d3.scaleBand()
-  //     .range([0, width])
-  //     .padding(0.1);
-
-  // var y = d3.scaleLinear()
-  //     .range([height, 0]);
-
-  // var bottomAxis = d3.axisBottom(x)
-  //     .tickFormat(function(d){ return d['RateBeer ID'];});
-  // var leftAxis = d3.axisLeft(y);
-
-  // y.domain([0, d3.max(tableData, function(d){
-  //   if(isNaN(d.abv)){
-  //         return 0;
-  //       } else{
-  //       return d.abv;
-  //     }
-  // })])
-
-  // x.domain(tableData.map(function(d) {
-  //   return d['RateBeer ID'];
-  // }))
-
-  // var bars = chart.selectAll(".bar")
-  //     .data(tableData)
-  //     .enter()
-  //     .append("rect")
-  //     .attr("class", "bar")
-  //     .attr("height", function(d){
-  //         if(isNaN(d.abv)){
-  //           return 0;
-  //         } else{
-  //           return y(d.abv);
-  //         }
-  //     })
-  //     .attr("x", function(d){
-  //       return x(d['RateBeer ID']);
-  //     })
-  //     .attr("height", x.bandwidth());
-
-  // chart.append("g")
-  //     .attr("transform", "translate(0," + height + ")")
-  //     .call(d3.axisBottom(x));
-  // svg.selectAll("text")
-  //   .attr("transform", "rotate(90)")
-  //   .style("text-anchor", "start");
-
-  // // add the y Axis
-  // chart.append("g")
-  //     .call(d3.axisLeft(y));
-
-  // // Step 6: Initialize tool tip
-  //   // ==============================
-  // var toolTip = d3.tip()
-  //   .attr("class", "tooltip")
-  //   // .offset([80, -60])
-  //   .html(function(d) {
-  //     return (`Beer:${d.name}`);
-  //   });
-
-  // bars.call(toolTip);
-
-  // // Step 7: Create tooltip in the chart
-  // // ==============================
-  // chart.call(toolTip);
-
-  // // Step 8: Create event listeners to display and hide the tooltip
-  // // ==============================
-  // bars.on("click", function(data) {
-  //   toolTip.show(data, this);
-  //   })
-  //   // onmouseout event
-  //   .on("mouseout", function(data, index) {
-  //     toolTip.hide(data);
-  //   })
-
+  // add the y Axis
+  svg.append("g")
+    .call(d3.axisLeft(y));
 }
 
  //*** Build Beer List ***
+
 function buildBeerList(data) {
   // Use d3 to select the panel with id of `#sample-metadata`
   var beerlist = d3.select('#beerlist');
@@ -153,7 +96,6 @@ function getBeers(brewery) {
   // console.log(brewery);
   // console.log(filteredData[0]['name']);
   buildBeerList(filteredData);
-  buildChart(filteredData);
 }
 
 function createMap(beerStations) {
@@ -207,3 +149,4 @@ beerMarkers.push(bigrip);
 
 // Create a layer group made from the bike markers array, pass it into the createMap function
 createMap(L.layerGroup(beerMarkers));
+buildbigChart();

@@ -81,13 +81,13 @@ def getBeers(brewery):
 #print(w.find_all('a'))
 
 
-breweries = ['The Big Rip']
+breweries = ['East Forty']
 beer_data = {}
 for x in breweries:
     a = getBeers(x)
     beer_data[x] = a
 
-with open('bigrip.json', 'w') as outfile:
+with open('eastforty.json', 'w') as outfile:
     json.dump(beer_data, outfile)
 
 

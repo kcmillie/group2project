@@ -1,3 +1,4 @@
+# scrape news and put into database
 from splinter import Browser
 from bs4 import BeautifulSoup
 from datetime import datetime

@@ -1,0 +1,48 @@
+CREATE TABLE beers5 (
+    beerid INTEGER PRIMARY KEY AUTOINCREMENT,
+    ratebeerid TEXT,
+    ratings TEXT,
+    abv TEXT,
+    brewery TEXT,
+    calories TEXT,
+    ibu TEXT,
+    name TEXT,
+    rating TEXT,
+    score TEXT,
+    googlerating FLOAT,
+    yearfounded BIGINT
+);
+
+INSERT INTO beers5 (
+    ratebeerid,
+    ratings,
+    abv,
+    brewery,
+    calories,
+    ibu,
+    name,
+    rating,
+    score,
+    googlerating,
+    yearfounded
+)
+SELECT * FROM beers4;
+
+
+CREATE TABLE breweries (
+    breweryid INTEGER PRIMARY KEY AUTOINCREMENT,
+    google FLOAT,
+    name TEXT,
+    year BIGINT,
+    lat FLOAT,
+    long FLOAT
+);
+
+INSERT INTO breweries (
+    google,
+    name,
+    year,
+    lat,
+    long
+)
+SELECT "Google Rating", "Name","Year Opened", lat, long FROM breweries2;
