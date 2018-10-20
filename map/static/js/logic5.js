@@ -1,13 +1,30 @@
+function p2f(x) {
+  return parseFloat(x.slice(0, -1));
+};
+
+function stripScore(x) {
+  return parseFloat(x.slice(0, -2));
+};
+
+function whatrow(array, value, thing) {
+  var row = 0;
+  for (var i = 0; i < array.length; i++){
+    if(array[i][thing] == value){
+      row = i;
+    }
+  }
+  return row;
+};
+
 function boozybeerdata(keys, beer){
   // d3.json('/beers').then((beer) => {
     var Now2016 = false;
     var B20102015 = false;
     var Before2010 = false;
-
     var BeerCount = [];
     var BeerCategories = ['no info', 'Weak', 'Regular', 'Boozy', 'Very Boozy'];
     for (var i = 0; i<BeerCategories.length; i++){
-      var RowCount = {}
+      var RowCount = {};
       RowCount['abv'] = BeerCategories[i];
       for (var k=0; k<keys.length; k++){
           RowCount[keys[k]] = 0;
@@ -22,25 +39,7 @@ function boozybeerdata(keys, beer){
           }
       }
       BeerCount.push(RowCount);
-    }
-
-    function p2f(x) {
-      return parseFloat(x.slice(0, -1));
-    }
-
-    function stripScore(x) {
-      return parseFloat(x.slice(0, -2));
-    }
-
-    function whatrow(array, value) {
-        var row = 0;
-        for (var i = 0; i < array.length; i++){
-          if(array[i].abv == value){
-            row = i;
-          }
-        }
-        return row;
-    }
+    };
 
     function whattype(abv) {
         if (abv == '-'){
@@ -54,13 +53,13 @@ function boozybeerdata(keys, beer){
         } else {
           return "Very Boozy";
         }
-    }
+    };
 
     function addcount(CountArray, Beer, Year) {
         var category = whattype(Beer.abv);
-        var rownum = whatrow(CountArray, category);
+        var rownum = whatrow(CountArray, category,'abv');
         CountArray[rownum][Year]++;
-    }
+        };
 
     // console.log(beer[1]);
     for (var i = 0; i < beer.length; i++) {
@@ -71,50 +70,107 @@ function boozybeerdata(keys, beer){
       } else if ((beer[i].yearfounded < 2010) && (Before2010 == true)) {
           addcount(BeerCount, beer[i], 'Before_2010');
       }
-    }
-    console.log("**boozybeerdata**")
-    console.log(BeerCount);
+    };
+
     return BeerCount;
-    // elementPos = array.map(function(x) {return x.id; }).indexOf(idYourAreLookingFor);
 
   // });
-}
+};
 
 
-function BoozyStackedPlot(beerdata, keys){
-    var svgWidth = 600,
-        svgHeight = 500;
+function ratingsbeerdata(keys, beer){
+  // d3.json('/beers').then((beer) => {
+    var Now2016 = false;
+    var B20102015 = false;
+    var Before2010 = false;
+    var BeerCount = [];
+    var BeerCategories = ['no info', 'ok', 'good', 'great'];
+    for (var i = 0; i<BeerCategories.length; i++){
+      var RowCount = {};
+      RowCount['score'] = BeerCategories[i];
+      for (var k=0; k<keys.length; k++){
+          RowCount[keys[k]] = 0;
+          if (keys[k] == 'Founded_2016_now') {
+            Now2016 = true;
+          }
+          if (keys[k] == 'Founded_2010_to_2015') {
+            B20102015 = true;
+          }
+          if (keys[k] == 'Before_2010') {
+            Before2010 = true;
+          }
+      }
+      BeerCount.push(RowCount);
+    };
+
+    function rateMe(score) {
+        if (score == '-/5'){
+          return 'no info';
+        } else if(stripScore(score) < 3.0){
+          return 'ok';
+        } else if(stripScore(score) < 4.0){
+          return 'good';
+        } else {
+          return "great";
+        }
+    }
+
+    function addcount(CountArray, Beer, Year) {
+        var category = rateMe(Beer.score);
+        var rownum = whatrow(CountArray, category,'score');
+        CountArray[rownum][Year]++;
+    };
+
+    for (var i = 0; i < beer.length; i++) {
+      if((beer[i].yearfounded > 2015) && (Now2016 == true)) {
+          addcount(BeerCount, beer[i], 'Founded_2016_now');
+      } else if ((beer[i].yearfounded < 2016) && (beer[i].yearfounded > 2009) && (B20102015 == true)) {
+          addcount(BeerCount, beer[i], 'Founded_2010_to_2015');
+      } else if ((beer[i].yearfounded < 2010) && (Before2010 == true)) {
+          addcount(BeerCount, beer[i], 'Before_2010');
+      }
+    };
+
+    return BeerCount;
+
+  // });
+};
 
 
-    var svg = d3.select("#boozyplot")
+function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
+  var svgWidth = 600,
+        svgHeight = 400;
+
+  //#boozyplot
+  var svg = d3.select(chartname)
             .html("")
             .append("svg")
             .attr("width", svgWidth)
             .attr("height", svgHeight);
-    var margin = {top: 20, right: 20, bottom: 30, left: 40};
-    var width = svgWidth - margin.left - margin.right;
-    var height = svgHeight - margin.top - margin.bottom;
-    var g = svg.append("g")
+  var margin = {top: 100, right: 20, bottom: 30, left: 40};
+  var width = svgWidth - margin.left - margin.right;
+  var height = svgHeight - margin.top - margin.bottom;
+  var g = svg.append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // set x scale
-    var x = d3.scaleBand()
+  // set x scale
+  var x = d3.scaleBand()
         .rangeRound([0, width])
-        .paddingInner(0.05)
+        .paddingInner(0.5)
         .align(0.1);
 
-    // set y scale
-    var y = d3.scaleLinear()
+  // set y scale
+  var y = d3.scaleLinear()
         .rangeRound([height, 0]);
 
-    // load the csv and create the chart
-    x.domain(beerdata.map(function(d) { return d.abv; }));
-    y.domain([0, 200]).nice();
-    var z = d3.scaleOrdinal().range(["#98abc5", "#8a89a6", "#7b6888"]);
+  // create the chart
+  x.domain(beerdata.map(function(d) { return d[plot]; }));
+  y.domain([0, (maxchart+75)]).nice();
+  var z = d3.scaleOrdinal().range(["#98abc5", "#8a89a6", "#7b6888"]);
 
-    var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
+  var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
 
-    var rectangles = g.append("g")
+  var rectangles = g.append("g")
       .selectAll("g")
       .data(d3.stack().keys(keys)(beerdata))
       .enter().append("g")
@@ -122,17 +178,17 @@ function BoozyStackedPlot(beerdata, keys){
       .selectAll("rect")
       .data(function(d) { return d; })
       .enter().append("rect")
-        .attr("x", function(d) { return x(d.data.abv); })
+        .attr("x", function(d) { return x(d.data[plot]); })
         .attr("y", function(d) { return y(d[1]); })
         .attr("height", function(d) { return y(d[0]) - y(d[1]); })
         .attr("width", x.bandwidth());
 
-    g.append("g")
+  g.append("g")
         .attr("class", "axis")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
 
-    g.append("g")
+  g.append("g")
         .attr("class", "axis")
         .call(d3.axisLeft(y).ticks(null, "s"))
       .append("text")
@@ -143,35 +199,35 @@ function BoozyStackedPlot(beerdata, keys){
         .attr("font-weight", "bold")
         .attr("text-anchor", "start");
 
-    function keyTest(obj, value){
-        var key = null;
-        for (var prop in obj){
-          if (obj.hasOwnProperty(prop)){
-            if (obj[prop] === value){
-              key = prop;
-            }
-          }
-        }
-        return key;
+  function keyTest(obj, value){
+      var key = null;
+      for (var prop in obj){
+        if (obj.hasOwnProperty(prop)){
+          if (obj[prop] === value){
+            key = prop;
+          };
+        };
       };
+      return key;
+  };
 
-    var toolTip = d3.tip()
+  var toolTip = d3.tip()
       .attr("class", "tooltip")
       .html(function(d) {
-        console.log(keyTest(d.data, d[1]-d[0]))
+        // console.log(keyTest(d.data, d[1]-d[0]))
         return (`Quantity: ${d[1]-d[0]}`);
       });
 
-    g.call(toolTip);
+  g.call(toolTip);
 
-    rectangles.on("click", function(data){
+  rectangles.on("mouseover", function(data) {
       toolTip.show(data, this);
       })
       .on("mouseout", function(data, index){
         toolTip.hide(data);
-      });
+  });
 
-    var legend = g.append("g")
+  var legend = g.append("g")
         .attr("font-family", "sans-serif")
         .attr("font-size", 10)
         .attr("text-anchor", "end")
@@ -180,13 +236,13 @@ function BoozyStackedPlot(beerdata, keys){
       .enter().append("g")
         .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-    legend.append("rect")
+  legend.append("rect")
         .attr("x", width - 19)
         .attr("width", 19)
         .attr("height", 19)
         .attr("fill", z);
 
-    legend.append("text")
+  legend.append("text")
         .attr("x", width - 24)
         .attr("y", 9.5)
         .attr("dy", "0.32em")
@@ -270,24 +326,38 @@ function buildMap(year, beer){
     }
 
     var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
-    var bdb = boozybeerdata(keys, beer);
-    console.log("***after calling boozybeerdata**")
-    console.log(bdb)
-    console.log('***')
-    BoozyStackedPlot(bdb, keys);
+
+    function findmax(beerdata, keys){
+      var maxnum = 0;
+      for(var i = 0; i<beerdata.length; i++){
+        for(var k = 0; k<keys.length; k++){
+          if (beerdata[i][keys[k]] > maxnum){
+            maxnum = beerdata[i][keys[k]];
+          };
+        };
+      };
+      return (maxnum * 1.2);
+    };
+    var boozemax = findmax(boozybeerdata(keys, beer), keys);
+    var ratemax = findmax(ratingsbeerdata(keys, beer), keys);
+
+    BoozyStackedPlot('#boozyplot', boozybeerdata(keys, beer), keys, 'abv', boozemax);
+    BoozyStackedPlot('#rateplot', ratingsbeerdata(keys, beer), keys, 'score', ratemax);
 
     map.on("overlayadd", (e) => {
       keys.push(e["name"]);
-      BoozyStackedPlot(boozybeerdata(keys, beer), keys);
+      BoozyStackedPlot('#boozyplot', boozybeerdata(keys, beer), keys, 'abv', boozemax);
+      BoozyStackedPlot('#rateplot', ratingsbeerdata(keys, beer), keys, 'score', ratemax);
     });
 
     map.on("overlayremove", (e) => {
       var index = keys.indexOf(e["name"]);
       keys.splice(index, 1);
-      BoozyStackedPlot(boozybeerdata(keys, beer), keys);
+      BoozyStackedPlot('#boozyplot',boozybeerdata(keys, beer), keys, 'abv', boozemax);
+      BoozyStackedPlot('#rateplot', ratingsbeerdata(keys, beer), keys, 'score', ratemax);
     });
 
-    console.log(brewCount);
+    // console.log(brewCount);
 
 
   // })

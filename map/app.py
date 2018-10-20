@@ -39,7 +39,7 @@ def index():
 
 @app.route("/breweries")
 def brewery():
-    """Return a list of sample names."""
+    """returns brewery list"""
 
     test = db.session.query(breweries).statement
     df = pd.read_sql_query(test, db.session.bind)
@@ -50,7 +50,7 @@ def brewery():
 
 @app.route("/beers")
 def beers():
-    """Return a list of sample names."""
+    """returns beer list"""
 
     beers = db.session.query(beerdB).statement
     df = pd.read_sql_query(beers, db.session.bind)
