@@ -1,0 +1,10 @@
+CREATE TABLE beer (
+    beerid INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    style TEXT,
+    rating FLOAT,
+    score FLOAT,
+    total_rating INTEGER,
+    breweryid INTEGER,
+    FOREIGN KEY(breweryid) REFERENCES breweries(breweryid)
+);

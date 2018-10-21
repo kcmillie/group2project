@@ -42,13 +42,13 @@ function boozybeerdata(keys, beer){
     };
 
     function whattype(abv) {
-        if (abv == '-'){
+        if (abv === null){
           return 'no info';
-        } else if(p2f(abv) < 5.0){
+        } else if(abv < 5.0){
           return 'Weak';
-        } else if(p2f(abv) < 7.0){
+        } else if(abv < 7.0){
           return 'Regular';
-        } else if(p2f(abv) < 9.0){
+        } else if(abv < 9.0){
           return "Boozy";
         } else {
           return "Very Boozy";
@@ -63,11 +63,11 @@ function boozybeerdata(keys, beer){
 
     // console.log(beer[1]);
     for (var i = 0; i < beer.length; i++) {
-      if((beer[i].yearfounded > 2015) && (Now2016 == true)) {
+      if((beer[i].year_founded > 2015) && (Now2016 == true)) {
           addcount(BeerCount, beer[i], 'Founded_2016_now');
-      } else if ((beer[i].yearfounded < 2016) && (beer[i].yearfounded > 2009) && (B20102015 == true)) {
+      } else if ((beer[i].year_founded < 2016) && (beer[i].year_founded > 2009) && (B20102015 == true)) {
           addcount(BeerCount, beer[i], 'Founded_2010_to_2015');
-      } else if ((beer[i].yearfounded < 2010) && (Before2010 == true)) {
+      } else if ((beer[i].year_founded < 2010) && (Before2010 == true)) {
           addcount(BeerCount, beer[i], 'Before_2010');
       }
     };
@@ -104,11 +104,11 @@ function ratingsbeerdata(keys, beer){
     };
 
     function rateMe(score) {
-        if (score == '-/5'){
+        if (score === null){
           return 'no info';
-        } else if(stripScore(score) < 3.0){
+        } else if(score < 3.0){
           return 'ok';
-        } else if(stripScore(score) < 4.0){
+        } else if(score < 4.0){
           return 'good';
         } else {
           return "great";
@@ -122,11 +122,11 @@ function ratingsbeerdata(keys, beer){
     };
 
     for (var i = 0; i < beer.length; i++) {
-      if((beer[i].yearfounded > 2015) && (Now2016 == true)) {
+      if((beer[i].year_founded > 2015) && (Now2016 == true)) {
           addcount(BeerCount, beer[i], 'Founded_2016_now');
-      } else if ((beer[i].yearfounded < 2016) && (beer[i].yearfounded > 2009) && (B20102015 == true)) {
+      } else if ((beer[i].year_founded < 2016) && (beer[i].year_founded > 2009) && (B20102015 == true)) {
           addcount(BeerCount, beer[i], 'Founded_2010_to_2015');
-      } else if ((beer[i].yearfounded < 2010) && (Before2010 == true)) {
+      } else if ((beer[i].year_founded < 2010) && (Before2010 == true)) {
           addcount(BeerCount, beer[i], 'Before_2010');
       }
     };
@@ -165,7 +165,7 @@ function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
 
   // create the chart
   x.domain(beerdata.map(function(d) { return d[plot]; }));
-  y.domain([0, (maxchart+75)]).nice();
+  y.domain([0, (maxchart)]).nice();
   var z = d3.scaleOrdinal().range(["#98abc5", "#8a89a6", "#7b6888"]);
 
   var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
@@ -330,9 +330,11 @@ function buildMap(year, beer){
     function findmax(beerdata, keys){
       var maxnum = 0;
       for(var i = 0; i<beerdata.length; i++){
+        total = 0
         for(var k = 0; k<keys.length; k++){
-          if (beerdata[i][keys[k]] > maxnum){
-            maxnum = beerdata[i][keys[k]];
+          total = total + beerdata[i][keys[k]]
+          if (total > maxnum){
+            maxnum = total;
           };
         };
       };
