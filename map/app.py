@@ -32,6 +32,7 @@ Base.prepare(db.engine, reflect=True)
 beerdB = Base.classes.beers5
 breweries = Base.classes.breweries
 beer = Base.classes.beer
+brewtweets = Base.classes.beertweet
 
 
 @app.route("/")
@@ -79,6 +80,46 @@ def beers2():
     # Return a list of the column names (sample names)
     return df.to_json(orient="records")
 
+
+@app.route("/eachtweet/<name>")
+def eachtweet(name):
+    """returns brewery list"""
+    print(name)
+    data = db.session.query(brewtweets).join("breweries").filter(func.lower(breweries.name)==func.lower(name))
+
+    thing1 = []
+    for y in data:
+        thisthing = {}
+        thisthing["tweet"] = y.tweet
+        thing1.append(thisthing)
+
+    # Return a list of the column names (sample names)
+    return json.dumps(thing1)
+
+
+
+@app.route("/beertweets", methods=['POST', 'GET'])
+def beertweets():
+    if request.method == "GET":
+        tweetlist = []
+        lunch = db.session.query(brewtweets).join("breweries")
+        for y in lunch:
+            thing = {}
+            thing["brewery"] = y.breweries.name
+            thing["tweet"] = y.tweet
+            tweetlist.append(thing)
+        stupidlist = json.dumps(tweetlist)
+        return stupidlist
+    else:
+        breweryName = request.form["brewery"]
+        tweet = request.form["tweet"]
+        breweryid = db.session.query(breweries.breweryid).filter_by(name = breweryName)[0][0]
+
+        newtweet = brewtweets(tweet=tweet, breweryid=breweryid)
+
+        db.session.add(newtweet)
+        db.session.commit()
+    return("")
 
 @app.route("/beers", methods=['POST', 'GET'])
 def beers():

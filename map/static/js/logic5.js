@@ -379,6 +379,7 @@ function buildMap(year, beer){
       var content = popup.getContent();
       var name = content.split('<')[0];
       var link = '/eachbrewery/' + name;
+      var link2 = '/eachtweet/' + name;
       d3.json(link).then((b) => {
 
         var totalbeers = b.length;
@@ -386,10 +387,16 @@ function buildMap(year, beer){
         var box = d3.select('#boozyplot').html("");
         var tablebody = box.append("tbody");
         var tablerow = tablebody.append("tr");
-        var tabletitle = tablerow.append("th")
-            .attr("colspan", "2")
-            .html(entry => {return `${name} <br> <p>Total Beers: ${totalbeers}</p>`;
-              });
+        d3.json(link2).then((c) => {
+          var thingtweet = c['tweet'];
+          print(thingtweet)
+          var tabletitle = tablerow.append("th")
+              .attr("colspan", "2")
+              .html(entry => {return `${name} <br>
+                <span>Total Beers: ${totalbeers}</span><br>
+                <span>Latest Tweet: ${thingtweet}</span>`;
+                });
+        });
         var tabledata = tablebody.append("tr");
         var t1 = tabledata.append("td").attr("id", "list");
         var td1 = t1.append("div").attr("id", "beerlist");
@@ -397,24 +404,24 @@ function buildMap(year, beer){
         var td2 = tabledata.append("td").attr("id", "beerinfo");
 
         td1.selectAll('button')
-        .data(b)
-        .enter()
-        .append('button')
-        .attr('class', 'beerbutton')
-        .html(entry => {
-          return `${entry.name}`;
-        })
-        .on("click", entry => {
-            td2.html("")
-            .selectAll('span')
-            .data(['name', 'style','score', 'abv'])
-            .enter()
-            .append('span')
-            .attr('class', 'beerinfo')
-            .html(blah => {
-              return `${blah}: ${entry[blah]}`;
-            });
-        });
+          .data(b)
+          .enter()
+          .append('button')
+          .attr('class', 'beerbutton')
+          .html(entry => {
+            return `${entry.name}`;
+          })
+          .on("click", entry => {
+              td2.html("")
+              .selectAll('span')
+              .data(['name', 'style','score', 'abv'])
+              .enter()
+              .append('span')
+              .attr('class', 'beerinfo')
+              .html(blah => {
+                return `${blah}: ${entry[blah]}`;
+              });
+          });
 
         var eachbeerplot = d3.select("#rateplot").html("");
         littleplot(eachbeerplot, b, 'score')
