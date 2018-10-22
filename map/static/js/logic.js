@@ -137,10 +137,10 @@ function buildBeerList(data) {
       // console.log(entry)
       var beerdetail = d3.select('#beerdetail');
       beerdetail.html("");
-      beerdetail.selectAll('div')
-      .data(['name', 'abv', 'ibu', 'calories', 'score', '# of ratings', 'RateBeer ID'])
+      beerdetail.selectAll('li')
+      .data(['name', 'style', 'abv', 'score'])
       .enter()
-      .append('div')
+      .append('li')
       .html(blah => {
         return blah + ' : ' + entry[1][blah];
       });

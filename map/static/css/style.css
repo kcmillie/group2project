@@ -2,19 +2,43 @@ html,
 body,
 #map-id {
   height: 100%;
-  padding: 0;
-  margin: 0;
+  padding: 1px;
+  margin: 1px;
 }
 
-#BList {
+#boozyplot {
     height: 50%;
+    padding: 10;
+    margin: 10;
 }
 
-.beer_item {
+#rateplot {
+    height: 50%;
+    padding: 100;
+    margin: 10;
+}
+
+#list{
+    height: 100%;
+    padding: 10;
+    margin: 10;
+}
+
+#beerlist{
+    height: 300px;
+    overflow-y: scroll;
+}
+
+
+.beerbutton {
     display: block;
     background: none;
     border: none;
     text-align: left;
+}
+
+.beerinfo {
+    display: block;
 }
 .tooltip{
     background: "white";

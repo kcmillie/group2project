@@ -54,7 +54,7 @@ def brewery():
 @app.route("/eachbrewery/<name>")
 def eachbrewery(name):
     """returns brewery list"""
-
+    print(name)
     data = db.session.query(beer).join("breweries").filter(func.lower(breweries.name)==func.lower(name))
 
     beerslist = []

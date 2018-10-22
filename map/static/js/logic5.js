@@ -168,7 +168,7 @@ function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
   y.domain([0, (maxchart)]).nice();
   var z = d3.scaleOrdinal().range(["#98abc5", "#8a89a6", "#7b6888"]);
 
-  var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
+  // var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
 
   var rectangles = g.append("g")
       .selectAll("g")
@@ -249,127 +249,245 @@ function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
         .text(function(d) { return d; });
 };
 
+function compare(a,b) {
+  if (a.score < b.score)
+    return 1;
+  if (a.score > b.score)
+    return -1;
+  return 0;
+}
+
+function littleplot(chart, olddata, ratingorabv){
+  olddata.sort(compare);
+  var data = olddata.slice(0, 10);
+  console.log(data)
+
+  var svgWidth = 800;
+  var svgHeight = 500;
+
+  var margin = {
+    top: 20,
+    right: 40,
+    bottom: 80,
+    left: 100
+  };
+
+  var width = svgWidth - margin.left - margin.right;
+  var height = svgHeight - margin.top - margin.bottom;
+
+  var svg = chart.append("svg")
+      .attr("width", svgWidth)
+      .attr("height", svgHeight)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+  // set the ranges
+  var y = d3.scaleBand()
+          .range([height, 0])
+          .padding(0.1);
+
+  var x = d3.scaleLinear()
+          .range([0, width]);
+
+  // Scale the range of the data in the domains
+  // x.domain(data.map(function(d) { return d['name']; }));
+  x.domain([0, 4.5])
+  // y.domain([0, d3.max(data, function(d) { return d[ratingorabv]; })]);
+  y.domain(data.map(function(d) { return d['name']; }));
+  // console.log(data)
+  // append the rectangles for the bar chart
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("width", function(d) {return x(d[ratingorabv]); } )
+      .attr("y", function(d) { return y(d['name']); })
+      .attr("height", y.bandwidth());
+      // .attr("x", function(d) { return x(d['name']); })
+      // .attr("width", x.bandwidth())
+      // .attr("y", function(d) { return y(d[ratingorabv]); })
+      // .attr("height", function(d) { return height - y(d[ratingorabv]); });
+
+  // add the x Axis
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  // add the y Axis
+  svg.append("g")
+      .call(d3.axisLeft(y));
+}
+
 function buildMap(year, beer){
-  // d3.json('/breweries').then((year) => {
-    // Create the tile layer that will be the background of our map
-    var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}", {
-      attribution: "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>",
-      id: "mapbox.light",
-      maxzoom: 18,
-      accessToken: API_KEY
-    });
+  // Create the tile layer that will be the background of our map
+  var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}", {
+    attribution: "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>",
+    id: "mapbox.light",
+    maxzoom: 18,
+    accessToken: API_KEY
+  });
 
-    // Initialize all of the LayerGroups we'll be using
-    var layers = {
-      Founded_2016_now: new L.featureGroup(),
-      Founded_2010_to_2015: new L.featureGroup(),
-      Before_2010: new L.featureGroup()
-    };
+  // Initialize all of the LayerGroups we'll be using
+  var layers = {
+    Founded_2016_now: new L.featureGroup(),
+    Founded_2010_to_2015: new L.featureGroup(),
+    Before_2010: new L.featureGroup()
+  };
 
-    // Create the map object with options
-    var map = L.map("map-id", {
-      center: [39.0997, -94.5786],
-      zoom: 11,
-      layers:[
-      layers.Founded_2016_now,
-      layers.Founded_2010_to_2015,
-      layers.Before_2010
-      ]
-    });
+  // Create the map object with options
+  var map = L.map("map-id", {
+    center: [39.0997, -94.5786],
+    zoom: 11,
+    layers:[
+    layers.Founded_2016_now,
+    layers.Founded_2010_to_2015,
+    layers.Before_2010
+    ]
+  });
 
-    lightmap.addTo(map);
+  lightmap.addTo(map);
 
-    var overlays = {
-      "Founded_2016_now": layers.Founded_2016_now,
-      "Founded_2010_to_2015": layers.Founded_2010_to_2015,
-      "Before_2010": layers.Before_2010
+  var overlays = {
+    "Founded_2016_now": layers.Founded_2016_now,
+    "Founded_2010_to_2015": layers.Founded_2010_to_2015,
+    "Before_2010": layers.Before_2010
+  }
+
+  L.control.layers(null, overlays).addTo(map);
+
+  var info = L.control({
+    position: "bottomright"
+  });
+
+  info.onAdd = function(){
+    var div = L.DomUtil.create("div", "legend");
+    return div
+  }
+  info.addTo(map);
+
+  var brewCount = {
+    Founded_2016_now: 0,
+    Founded_2010_to_2015: 0,
+    Before_2010: 0
+  }
+
+  var brewCode;
+
+  function onClick(e) {
+      var popup = e.target.getPopup();
+      var content = popup.getContent();
+      var name = content.split('<')[0];
+      var link = '/eachbrewery/' + name;
+      d3.json(link).then((b) => {
+
+        var totalbeers = b.length;
+
+        var box = d3.select('#boozyplot').html("");
+        var tablebody = box.append("tbody");
+        var tablerow = tablebody.append("tr");
+        var tabletitle = tablerow.append("th")
+            .attr("colspan", "2")
+            .html(entry => {return `${name} <br> <p>Total Beers: ${totalbeers}</p>`;
+              });
+        var tabledata = tablebody.append("tr");
+        var t1 = tabledata.append("td").attr("id", "list");
+        var td1 = t1.append("div").attr("id", "beerlist");
+
+        var td2 = tabledata.append("td").attr("id", "beerinfo");
+
+        td1.selectAll('button')
+        .data(b)
+        .enter()
+        .append('button')
+        .attr('class', 'beerbutton')
+        .html(entry => {
+          return `${entry.name}`;
+        })
+        .on("click", entry => {
+            td2.html("")
+            .selectAll('span')
+            .data(['name', 'style','score', 'abv'])
+            .enter()
+            .append('span')
+            .attr('class', 'beerinfo')
+            .html(blah => {
+              return `${blah}: ${entry[blah]}`;
+            });
+        });
+
+        var eachbeerplot = d3.select("#rateplot").html("");
+        littleplot(eachbeerplot, b, 'score')
+      });
     }
 
-    L.control.layers(null, overlays).addTo(map);
-
-    var info = L.control({
-      position: "bottomright"
-    });
-
-    info.onAdd = function(){
-      var div = L.DomUtil.create("div", "legend");
-      return div
-    }
-    info.addTo(map);
-
-    var brewCount = {
-      Founded_2016_now: 0,
-      Founded_2010_to_2015: 0,
-      Before_2010: 0
-    }
-
-    var brewCode;
-
-    for(var i = 0; i<year.length; i++) {
-      brewCode = year[i].year;
-      if(brewCode > 2015) {
-        brewCode = "Founded_2016_now";
-      } else if(brewCode > 2009) {
-        // console.log(brewCode)
-        brewCode = "Founded_2010_to_2015";
-      } else {
-        brewCode = "Before_2010";
-      }
-
-      brewCount[brewCode]++;
-
-      var newMarker = L.marker([year[i].lat, year[i].long]);
-
-      newMarker.addTo(layers[brewCode]);
-
-      newMarker.bindPopup(year[i].name + "<br> Year Opened: " + year[i].year);
-    }
-
-    var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
-
-    function findmax(beerdata, keys){
-      var maxnum = 0;
-      for(var i = 0; i<beerdata.length; i++){
-        total = 0
-        for(var k = 0; k<keys.length; k++){
-          total = total + beerdata[i][keys[k]]
-          if (total > maxnum){
-            maxnum = total;
-          };
-        };
-      };
-      return (maxnum * 1.2);
-    };
-    var boozemax = findmax(boozybeerdata(keys, beer), keys);
-    var ratemax = findmax(ratingsbeerdata(keys, beer), keys);
-
-    BoozyStackedPlot('#boozyplot', boozybeerdata(keys, beer), keys, 'abv', boozemax);
-    BoozyStackedPlot('#rateplot', ratingsbeerdata(keys, beer), keys, 'score', ratemax);
-
-    map.on("overlayadd", (e) => {
-      keys.push(e["name"]);
+  function offClick(e) {
       BoozyStackedPlot('#boozyplot', boozybeerdata(keys, beer), keys, 'abv', boozemax);
       BoozyStackedPlot('#rateplot', ratingsbeerdata(keys, beer), keys, 'score', ratemax);
-    });
+    }
 
-    map.on("overlayremove", (e) => {
-      var index = keys.indexOf(e["name"]);
-      keys.splice(index, 1);
-      BoozyStackedPlot('#boozyplot',boozybeerdata(keys, beer), keys, 'abv', boozemax);
-      BoozyStackedPlot('#rateplot', ratingsbeerdata(keys, beer), keys, 'score', ratemax);
-    });
+  for(var i = 0; i<year.length; i++) {
+    brewCode = year[i].year;
+    if(brewCode > 2015) {
+      brewCode = "Founded_2016_now";
+    } else if(brewCode > 2009) {
+      // console.log(brewCode)
+      brewCode = "Founded_2010_to_2015";
+    } else {
+      brewCode = "Before_2010";
+    }
 
-    // console.log(brewCount);
+    brewCount[brewCode]++;
 
+    var newMarker = L.marker([year[i].lat, year[i].long]);
 
-  // })
-};
+    newMarker.addTo(layers[brewCode]);
 
-d3.json('/breweries').then((year) => {
-  d3.json('/beers').then((beer) => {
-    buildMap(year, beer);
+    newMarker.bindPopup(year[i].name + "<br> Year Opened: " + year[i].year).on('popupopen', onClick).on('popupclose', offClick);
+  }
+
+  var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
+
+  function findmax(beerdata, keys){
+    var maxnum = 0;
+    for(var i = 0; i<beerdata.length; i++){
+      total = 0
+      for(var k = 0; k<keys.length; k++){
+        total = total + beerdata[i][keys[k]]
+        if (total > maxnum){
+          maxnum = total;
+        };
+      };
+    };
+    return (maxnum * 1.2);
+  };
+  var boozemax = findmax(boozybeerdata(keys, beer), keys);
+  var ratemax = findmax(ratingsbeerdata(keys, beer), keys);
+
+  BoozyStackedPlot('#boozyplot', boozybeerdata(keys, beer), keys, 'abv', boozemax);
+  BoozyStackedPlot('#rateplot', ratingsbeerdata(keys, beer), keys, 'score', ratemax);
+
+  map.on("overlayadd", (e) => {
+    keys.push(e["name"]);
+    BoozyStackedPlot('#boozyplot', boozybeerdata(keys, beer), keys, 'abv', boozemax);
+    BoozyStackedPlot('#rateplot', ratingsbeerdata(keys, beer), keys, 'score', ratemax);
   });
-});
+
+  map.on("overlayremove", (e) => {
+    var index = keys.indexOf(e["name"]);
+    keys.splice(index, 1);
+    BoozyStackedPlot('#boozyplot',boozybeerdata(keys, beer), keys, 'abv', boozemax);
+    BoozyStackedPlot('#rateplot', ratingsbeerdata(keys, beer), keys, 'score', ratemax);
+  });
+};
+function loadfullmap() {
+  d3.json('/breweries').then((year) => {
+    d3.json('/beers').then((beer) => {
+      buildMap(year, beer);
+    });
+  });
+}
+loadfullmap();
 
 
 
