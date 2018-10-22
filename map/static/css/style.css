@@ -17,7 +17,9 @@ body,
     margin-bottom: 50px;
     margin-left: 5px;
     text-align: center;
-    background: darkgray;
+    background: #630C0C;
+    color: white;
+
 }
 
 #map-id {
@@ -31,7 +33,12 @@ body,
     margin-right: 25px;
     margin-bottom: 5px;
     margin-left: 50px;
+    border: 5px solid #630C0C;
 
+}
+
+.littlebar {
+    fill: #0A3B5B;
 }
 
 #boozyplot {
@@ -39,10 +46,11 @@ body,
     /*margin-top: 5px;*/
     
     margin-right: 5px;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
     margin-left: 25px;
     margin-top: 10px;
-    background-color: darkgray;
+    background-color: #DDDED8;
+    border: 5px solid #630C0C;
 
 }
 
@@ -53,7 +61,8 @@ body,
     margin-right: 5px;
     margin-bottom: 5px;
     margin-left: 25px;
-    background-color: darkgray;
+    background-color: #DDDED8;
+    border: 5px solid #630C0C;
 }
 
 #list{
@@ -65,19 +74,34 @@ body,
 #beerlist{
     height: 200px;
     overflow-y: scroll;
+    background: #DDDED8;
 }
 
+#minibox{
+    color: #630C0C;
+}
 
 .beerbutton {
     display: block;
     background: none;
     border: none;
     text-align: left;
+    color: #AF0808;
 }
 
 .beerinfo {
     display: block;
 }
+
+#cheesecake{
+    color: #95A50D;
+    vertical-align: top;
+}
+
+#toast{
+    line-height: 14px;
+}
 .tooltip{
     background: "white";
+    color: black;
 }

@@ -136,6 +136,29 @@ function ratingsbeerdata(keys, beer){
   // });
 };
 
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr(".bandwidth()dy")),
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  })
+}
 
 function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
   var svgWidth = 700,
@@ -171,7 +194,7 @@ function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
   // create the chart
   x.domain(beerdata.map(function(d) { return d[plot]; }));
   y.domain([0, (maxchart)]).nice();
-  var z = d3.scaleOrdinal().range(["#98abc5", "#8a89a6", "#7b6888"]);
+  var z = d3.scaleOrdinal().range(["#630C0C", "#AF0808", "#95A50D"]);
 
   // var keys = ['Founded_2016_now', 'Founded_2010_to_2015','Before_2010'];
 
@@ -203,6 +226,21 @@ function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
         .attr("fill", "#000")
         .attr("font-weight", "bold")
         .attr("text-anchor", "start");
+
+  var charttitle = 'test'
+  if (chartname == '#boozyplot'){
+    charttitle = "How Boozy is the Beer?"
+  } else {
+    charttitle = "How Good is the Beer?"
+  }
+
+  svg.append("text")
+        .attr("x", (width / 2))             
+        .attr("y", 25)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "16px") 
+        .style("text-decoration", "underline")  
+        .text(charttitle);
 
   function keyTest(obj, value){
       var key = null;
@@ -247,6 +285,7 @@ function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
         .attr("height", 19)
         .attr("fill", z);
 
+
   legend.append("text")
         .attr("x", width - 24)
         .attr("y", 9.5)
@@ -271,7 +310,7 @@ function littleplot(chart, olddata, ratingorabv){
   var svgHeight = 280;
 
   var margin = {
-    top: 10,
+    top: 50,
     right: 40,
     bottom: 80,
     left: 100
@@ -297,7 +336,7 @@ function littleplot(chart, olddata, ratingorabv){
 
   // Scale the range of the data in the domains
   // x.domain(data.map(function(d) { return d['name']; }));
-  x.domain([0, 4.5])
+  x.domain([0, 4.0])
   // y.domain([0, d3.max(data, function(d) { return d[ratingorabv]; })]);
   y.domain(data.map(function(d) { return d['name']; }));
   // console.log(data)
@@ -305,7 +344,7 @@ function littleplot(chart, olddata, ratingorabv){
   svg.selectAll(".bar")
       .data(data)
     .enter().append("rect")
-      .attr("class", "bar")
+      .attr("class", "littlebar")
       .attr("width", function(d) {return x(d[ratingorabv]); } )
       .attr("y", function(d) { return y(d['name']); })
       .attr("height", y.bandwidth());
@@ -321,7 +360,17 @@ function littleplot(chart, olddata, ratingorabv){
 
   // add the y Axis
   svg.append("g")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y))
+      .selectAll(".tick text");
+        // .call(wrap, y.bandwidth());
+
+  svg.append("text")
+        .attr("x", (width / 2))             
+        .attr("y", -25)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "16px") 
+        .style("text-decoration", "underline")  
+        .text("Top 10 Beers and Rating");
 }
 
 function buildMap(year, beer){
@@ -397,16 +446,16 @@ function buildMap(year, beer){
           console.log(c)
           var tabletitle = tablerow.append("th")
               .attr("colspan", "2")
-              .html(entry => {return `<span id="beername">${name} </span><br>
-                <span id="beercount">Total Beers: ${totalbeers}</span><br>
-                <span id="tweet">Latest Tweet: ${thingtweet}</span>`;
+              .html(entry => {return `<span id="minibox">${name} <br>
+                Total Beers: ${totalbeers}<br>
+                Latest Tweet: ${thingtweet}<hr>`;
                 });
         });
-        var tabledata = tablebody.append("tr");
+        var tabledata = tablebody.append("tr").attr("id", "toast");
         var t1 = tabledata.append("td").attr("id", "list");
         var td1 = t1.append("div").attr("id", "beerlist");
 
-        var td2 = tabledata.append("td").attr("id", "beerinfo");
+        var td2 = tabledata.append("td").attr("id", "cheesecake");
 
         td1.selectAll('button')
           .data(b)
