@@ -138,16 +138,21 @@ function ratingsbeerdata(keys, beer){
 
 
 function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
-  var svgWidth = 600,
-        svgHeight = 400;
+  var svgWidth = 700,
+        svgHeight = 280;
 
   //#boozyplot
+  // var parentDiv = document.getElementById(chartname);
+  // var svg = d3.select(parentDiv).append("svg");
+  // var svgWidth = parentDiv.clientWidth;
+  // var svgHeight = parentDiv.clientHeight;
+
   var svg = d3.select(chartname)
             .html("")
             .append("svg")
             .attr("width", svgWidth)
             .attr("height", svgHeight);
-  var margin = {top: 100, right: 20, bottom: 30, left: 40};
+  var margin = {top: 10, right: 20, bottom: 30, left: 40};
   var width = svgWidth - margin.left - margin.right;
   var height = svgHeight - margin.top - margin.bottom;
   var g = svg.append("g")
@@ -262,11 +267,11 @@ function littleplot(chart, olddata, ratingorabv){
   var data = olddata.slice(0, 10);
   console.log(data)
 
-  var svgWidth = 800;
-  var svgHeight = 500;
+  var svgWidth = 700;
+  var svgHeight = 280;
 
   var margin = {
-    top: 20,
+    top: 10,
     right: 40,
     bottom: 80,
     left: 100
@@ -324,7 +329,7 @@ function buildMap(year, beer){
   var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>",
     id: "mapbox.light",
-    maxzoom: 18,
+    maxzoom: 15,
     accessToken: API_KEY
   });
 
@@ -338,7 +343,7 @@ function buildMap(year, beer){
   // Create the map object with options
   var map = L.map("map-id", {
     center: [39.0997, -94.5786],
-    zoom: 11,
+    zoom: 10,
     layers:[
     layers.Founded_2016_now,
     layers.Founded_2010_to_2015,
@@ -388,13 +393,13 @@ function buildMap(year, beer){
         var tablebody = box.append("tbody");
         var tablerow = tablebody.append("tr");
         d3.json(link2).then((c) => {
-          var thingtweet = c['tweet'];
-          print(thingtweet)
+          var thingtweet = c[0]['tweet'];
+          console.log(c)
           var tabletitle = tablerow.append("th")
               .attr("colspan", "2")
-              .html(entry => {return `${name} <br>
-                <span>Total Beers: ${totalbeers}</span><br>
-                <span>Latest Tweet: ${thingtweet}</span>`;
+              .html(entry => {return `<span id="beername">${name} </span><br>
+                <span id="beercount">Total Beers: ${totalbeers}</span><br>
+                <span id="tweet">Latest Tweet: ${thingtweet}</span>`;
                 });
         });
         var tabledata = tablebody.append("tr");
