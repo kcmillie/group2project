@@ -160,8 +160,29 @@ function wrap(text, width) {
   })
 }
 
+function updateDimensions(winWidth) {
+    margin.top = 20;
+    margin.right = 50;
+    margin.left = 50;
+    margin.bottom = 50;
+
+    width = winWidth - margin.left - margin.right;
+    height = 500 - margin.top - margin.bottom;
+  }
+
+function myFunction(chartname) {
+    	var W = $( chartname ).innerWidth();
+    	return W;
+	}
+
 function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
-  var svgWidth = 700,
+	window.addEventListener("resize", myFunction);
+	//get dimensions based on window size
+    // updateDimensions(window.innerWidth);
+
+  	// var svgWidth = 700,
+  	
+  	var	svgWidth = '100%',
         svgHeight = 280;
 
   //#boozyplot
@@ -170,13 +191,14 @@ function BoozyStackedPlot(chartname, beerdata, keys, plot, maxchart){
   // var svgWidth = parentDiv.clientWidth;
   // var svgHeight = parentDiv.clientHeight;
 
-  var svg = d3.select(chartname)
+  	var svg = d3.select(chartname)
             .html("")
             .append("svg")
             .attr("width", svgWidth)
             .attr("height", svgHeight);
+
   var margin = {top: 10, right: 20, bottom: 30, left: 40};
-  var width = svgWidth - margin.left - margin.right;
+  var width = myFunction('#boozyplot') - margin.left - margin.right;
   var height = svgHeight - margin.top - margin.bottom;
   var g = svg.append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -500,7 +522,14 @@ function buildMap(year, beer){
 
     brewCount[brewCode]++;
 
-    var newMarker = L.marker([year[i].lat, year[i].long]);
+    var beerIcon = L.icon({
+    	iconUrl: 'static/js/beer_marker.png',
+    	iconSize: [35, 60],
+    	iconAnchor:[22,94],
+    	popupAnchor: [-3,-76]
+    })
+
+    var newMarker = L.marker([year[i].lat, year[i].long],{icon: beerIcon});
 
     newMarker.addTo(layers[brewCode]);
 
